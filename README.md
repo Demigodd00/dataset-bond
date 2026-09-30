@@ -60,5 +60,10 @@ python -m pytest tests/integration/test_glsim_linked_contracts.py -q
 3. From the registry owner, call `register_job` with the exact deployed job address, buyer, provider, job ID, and title.
 4. Verify both addresses and source hashes in `deployments/studionet.json` before publishing evidence links.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/SECURITY.md](docs/SECURITY.md), and [docs/SUBMISSION.md](docs/SUBMISSION.md) for the full rationale and submission checklist.
+The release script performs those steps with disposable StudioNet-only signers, faucet-issued test GEN, a complete assessment and settlement lifecycle, and exact deployed-source verification:
 
+```powershell
+python scripts/deploy_studionet.py
+```
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/SECURITY.md](docs/SECURITY.md), and [docs/SUBMISSION.md](docs/SUBMISSION.md) for the full rationale and submission checklist.
