@@ -14,7 +14,9 @@
   "tests": {
     "direct": "9 passed",
     "glsim_linked_contracts": "1 passed",
-    "independently_bound_assessment_dimensions": 5
+    "independently_bound_assessment_dimensions": 5,
+    "studionet_end_to_end": "passed",
+    "studionet_source_commit": "4f1af3038f7ec5bef0ac269cdbf95e638a8cbf87"
   },
   "demo_manifest_sha256": "a9065c4f9a89dd367a789711a2d5f0800e003193f0f4a9f6e51c713f7e2f7a42"
 }

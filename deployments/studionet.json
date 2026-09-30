@@ -1,23 +1,82 @@
 {
   "network": "studionet",
-  "chain_id": "PENDING",
-  "commit": "PENDING",
+  "chain_id": 61999,
+  "commit": "4f1af3038f7ec5bef0ac269cdbf95e638a8cbf87",
+  "deployed_at": "2026-09-30T04:23:33.589485+00:00",
+  "wallet_policy": "disposable StudioNet-only signers; no secret retained or committed",
+  "test_currency": "StudioNet faucet-issued GEN with no monetary value",
   "registry": {
-    "address": "PENDING",
-    "deploy_transaction": "PENDING",
-    "source_sha256": "PENDING"
+    "address": "0x2A88B9BB519e9dE27382b45fBdF078276fA507b5",
+    "deployer": "0xB55731c0C9BaC43A10De96E937a715540bFba913",
+    "deploy_transaction": "0x8fb97ec71288a570bcc922b2d6bf968c88bc05c1f39e957a8f2bd7f52c12052a",
+    "source_sha256": "7a27e1e98063cf9a821e11f90a852c6a83c64102ea8fc294ebded60d06354b65",
+    "registration_transaction": "0xe2b279eb99c2f7d66b8d2d2b13d5c4324c8a6fee824495789b08aa844a65d0da",
+    "reported_outcome": {
+      "buyer": "0xb55731c0c9bac43a10de96e937a715540bfba913",
+      "buyer_refund_bps": "0",
+      "contract_address": "0x3910500dd65c0e8bcbc81bad025ccf7b172d3fd7",
+      "created_at_iso": "2026-09-30T04:13:43+00:00",
+      "created_at_unix": "1790741623",
+      "final_outcome": "BUYER_ACCEPTED",
+      "id": "dataset-001",
+      "provider": "0xa74b3ed99a05fcfbfc08eb5a2878a37ec0fc982d",
+      "provider_payout_bps": "10000",
+      "reported": true,
+      "settled_at_iso": "2026-09-30T04:22:08+00:00",
+      "settled_at_unix": "1790742128",
+      "title": "Public Transit Intent Dataset"
+    }
   },
   "job": {
-    "address": "PENDING",
-    "deploy_transaction": "PENDING",
-    "registration_transaction": "PENDING",
-    "source_sha256": "PENDING"
+    "address": "0x3910500DD65c0e8BCbC81baD025ccF7B172D3fD7",
+    "buyer": "0xB55731c0C9BaC43A10De96E937a715540bFba913",
+    "provider": "0xA74b3eD99a05FcFbfC08Eb5A2878A37eC0fc982D",
+    "deploy_transaction": "0x8bf21d1d21295d9d1e63f214c908d9bab465aaf79a130da72d068db01e6bf0ed",
+    "source_sha256": "5f18c26a8418d901d6a670db1538106a4bd5b6fc35372a02f0d5f180dcf6c889",
+    "constructor_args": [
+      "0x2A88B9BB519e9dE27382b45fBdF078276fA507b5",
+      "0xB55731c0C9BaC43A10De96E937a715540bFba913",
+      "0xA74b3eD99a05FcFbfC08Eb5A2878A37eC0fc982D",
+      "dataset-001",
+      "Public Transit Intent Dataset",
+      "Deliver a labeled English-language intent dataset for public-transit support requests.",
+      "Every record has id, utterance, intent, and source_batch; intent uses the frozen taxonomy.",
+      "Labels follow the written intent definitions and the supplied ambiguous-example policy.",
+      "Each source_batch is identified and the delivery includes a collection-method declaration.",
+      1000,
+      6000,
+      3600,
+      3600,
+      3600,
+      3600,
+      3600
+    ]
   },
   "smoke_test": {
-    "fund_transaction": "PENDING",
-    "assessment_transaction": "PENDING",
-    "settlement_transaction": "PENDING",
-    "observed_final_outcome": "PENDING"
+    "faucet_transaction": "0x73d54496d000c8a3db538125094ff445559cd7dfa5982883171ea27f6f7226e2",
+    "fund_transaction": "0xc692cf991760dac4ca40550d59ec14735ddab93ebbd21b934f9303ee54146ef3",
+    "accept_transaction": "0xcafe1c6fae5d603ef733494aa18613cd6181775123bf477c106d2c7dd62da772",
+    "submission_transactions": [
+      "0x2171f439b2c5ba2cc4c8dc95826f6f18de661f03ecbd2e6f4a1c6bd2a0a54fce"
+    ],
+    "assessment_transactions": [
+      "0x3b4b561d2c81c5c358856c396a3c67308d683da33a3e1a0ec6096449662725e3",
+      "0x00dadcca4b3078f42d2c5d655bfa63db2176f4538c387b41b4d3cdb740db3a0b",
+      "0x625f55ce800759dcc77f129b7298a3bf90ae2e4de7f9b03258be3b0c736137db",
+      "0x6b491a3fd9a23b57e2f477efdf2dd5945abd0e927ce6e377299ca276e02fbd06",
+      "0x5524762ce2631f5a362e9b6c14e3fb26eb03e091de2d1447afafd0196bf2824c"
+    ],
+    "settlement_transaction": "0xc22c7128adf7c72222a92fe4c46cfeaaf93fdeba8268a1675feee350f4c83278",
+    "withdraw_transaction": "0xb694458b09f9d11ec81e2b1087a7e9f8ac3b06596eb0db35ed282b37bbb11b21",
+    "observed_assessment": {
+      "annotation": "PASS",
+      "completeness": "PASS",
+      "consistency": "PASS",
+      "provenance": "PASS",
+      "schema": "PASS"
+    },
+    "observed_model_outcome": "ACCEPT",
+    "observed_final_outcome": "BUYER_ACCEPTED",
+    "provider_credit_after_withdrawal": "0"
   }
 }
-
