@@ -1,0 +1,10 @@
+{
+  "dataset": "public-transit-intents-demo",
+  "version": 1,
+  "records": 1200,
+  "format": "jsonl",
+  "fields": ["id", "utterance", "intent", "source_batch"],
+  "taxonomy": ["route_question", "delay_report", "fare_question", "accessibility_request"],
+  "language": "en"
+}
+

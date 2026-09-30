@@ -1,0 +1,23 @@
+{
+  "network": "studionet",
+  "chain_id": "PENDING",
+  "commit": "PENDING",
+  "registry": {
+    "address": "PENDING",
+    "deploy_transaction": "PENDING",
+    "source_sha256": "PENDING"
+  },
+  "job": {
+    "address": "PENDING",
+    "deploy_transaction": "PENDING",
+    "registration_transaction": "PENDING",
+    "source_sha256": "PENDING"
+  },
+  "smoke_test": {
+    "fund_transaction": "PENDING",
+    "assessment_transaction": "PENDING",
+    "settlement_transaction": "PENDING",
+    "observed_final_outcome": "PENDING"
+  }
+}
+

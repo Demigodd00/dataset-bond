@@ -1,0 +1,10 @@
+{
+  "records_checked": 1200,
+  "schema_errors": 0,
+  "missing_required_values": 0,
+  "duplicate_rate": 0.002,
+  "label_audit_sample": 240,
+  "label_audit_accuracy": 0.97,
+  "taxonomy_outliers": 0
+}
+

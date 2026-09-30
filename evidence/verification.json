@@ -1,0 +1,20 @@
+{
+  "verified_on": "2026-09-30",
+  "runner": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+  "sources": {
+    "contracts/DatasetBondRegistry.py": {
+      "sha256": "7a27e1e98063cf9a821e11f90a852c6a83c64102ea8fc294ebded60d06354b65",
+      "genvm_lint": "passed"
+    },
+    "contracts/DatasetBondJob.py": {
+      "sha256": "acebaef61696551373732d45eb6815244657bb4ada33a89f60713f66d4b4d77e",
+      "genvm_lint": "passed"
+    }
+  },
+  "tests": {
+    "direct": "9 passed",
+    "glsim_linked_contracts": "1 passed",
+    "independent_validator_replays_for_assessment": 5
+  },
+  "demo_manifest_sha256": "a9065c4f9a89dd367a789711a2d5f0800e003193f0f4a9f6e51c713f7e2f7a42"
+}

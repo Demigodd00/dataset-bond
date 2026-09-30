@@ -1,0 +1,7 @@
+{
+  "source_batches": ["consented-support-simulation-a", "consented-support-simulation-b"],
+  "collection_method": "Human-written synthetic public-transit support requests produced for this demonstration.",
+  "contains_personal_data": false,
+  "license_declaration": "Demo evidence only; no production dataset is included in this repository."
+}
+

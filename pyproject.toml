@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "integration: local GLSim integration tests",
+  "studionet: live StudioNet smoke tests",
+]

@@ -1,0 +1,30 @@
+name: contract-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - run: genvm-lint contracts/DatasetBondRegistry.py
+      - run: genvm-lint contracts/DatasetBondJob.py
+      - run: python -m pytest tests/direct -q
+      - name: Start GLSim
+        run: |
+          python tests/run_glsim.py --no-browser --seed 42 > glsim.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -s http://127.0.0.1:4000/api >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat glsim.log
+          exit 1
+      - run: python -m pytest tests/integration/test_glsim_linked_contracts.py -q
+
