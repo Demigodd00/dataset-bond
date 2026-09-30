@@ -4,7 +4,7 @@
 
 - Public evidence is adversarial input. It is size-bounded, UTF-8 checked, and framed as data rather than instructions.
 - The fetched manifest must match the provider's submitted SHA-256 digest before model assessment begins.
-- LLM output is untrusted until its exact six-field shape and five label values are validated.
+- LLM output is untrusted until its exact two-field shape and one permitted label value are validated for the current dimension.
 - Payment is deterministic contract code; an LLM cannot set amounts or invent a settlement category.
 - Registry reputation accepts reports only when `gl.message.sender_address` is an authenticated job address.
 - The registry owner must inspect the deployed child source and constructor values before registration.
@@ -22,6 +22,7 @@
 ## Assessment safety
 
 - Schema and provenance are hard-failure dimensions.
+- Each of the five payment-relevant labels is independently bound in its own intelligent transaction before deterministic aggregation.
 - `UNCLEAR` cannot be silently treated as acceptance.
 - Exactly one revision and one scoped challenge are available.
 - A challenge can modify only its named dimension, after independently fetching original and counterevidence.

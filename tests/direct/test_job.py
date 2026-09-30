@@ -11,7 +11,8 @@ EVIDENCE = "https://evidence.example.org/validation.json"
 PROVENANCE = "https://evidence.example.org/provenance.json"
 MANIFEST_BODY = '{"records":1200,"fields":["id","utterance","intent","source_batch"]}'
 DIGEST = hashlib.sha256(MANIFEST_BODY.encode("utf-8")).hexdigest()
-PROMPT = "You are evaluating a commissioned dataset delivery"
+PROMPT = "Evaluate exactly one commissioned dataset delivery dimension"
+DIMENSIONS = ("SCHEMA", "COMPLETENESS", "ANNOTATION", "CONSISTENCY", "PROVENANCE")
 
 
 def address(account) -> str:
@@ -52,17 +53,8 @@ def fund_accept_submit(contract, vm, buyer, provider):
     contract.submit_delivery(MANIFEST, EVIDENCE, PROVENANCE, DIGEST, 1200)
 
 
-def assessment(**overrides):
-    result = {
-        "schema": "PASS",
-        "completeness": "PASS",
-        "annotation": "PASS",
-        "consistency": "PASS",
-        "provenance": "PASS",
-        "summary": "The supplied packet affirmatively supports all five frozen dimensions.",
-    }
-    result.update(overrides)
-    return result
+def dimension_result(label="PASS", summary="The supplied evidence supports this frozen dimension."):
+    return {"label": label, "summary": summary}
 
 
 def mock_packet(vm, result):
@@ -72,17 +64,27 @@ def mock_packet(vm, result):
     vm.mock_llm(PROMPT, json.dumps(result))
 
 
+def assess_dimensions(contract, vm, labels=None):
+    labels = labels or {}
+    for dimension in DIMENSIONS:
+        vm.clear_mocks()
+        label = labels.get(dimension, "PASS")
+        mock_packet(vm, dimension_result(label, f"{dimension} is {label}."))
+        contract.assess_submission()
+
+
 def test_consensus_assessment_and_buyer_accept_create_pull_credit(
     direct_vm, direct_deploy, direct_alice, direct_bob, direct_charlie
 ):
     contract = deploy(direct_vm, direct_deploy, direct_alice, direct_bob, direct_charlie)
     fund_accept_submit(contract, direct_vm, direct_alice, direct_bob)
-    mock_packet(direct_vm, assessment())
-    contract.assess_submission()
+    assess_dimensions(contract, direct_vm)
     leader = direct_vm._captured_validators[-1][0]
     for _ in range(5):
         assert direct_vm.run_validator(leader_result=leader) is True
     assert contract.get_assessment(1)["overall"] == "ACCEPT"
+    assert contract.get_state()["assessment_dimension_index"] == "5"
+    assert contract.get_dimension_assessment(1, "PROVENANCE")["label"] == "PASS"
 
     direct_vm.sender = direct_alice
     contract.buyer_accept()
@@ -98,15 +100,13 @@ def test_unclear_result_allows_exactly_one_revision(
 ):
     contract = deploy(direct_vm, direct_deploy, direct_alice, direct_bob, direct_charlie)
     fund_accept_submit(contract, direct_vm, direct_alice, direct_bob)
-    mock_packet(direct_vm, assessment(annotation="UNCLEAR", summary="The annotation audit is ambiguous."))
-    contract.assess_submission()
+    assess_dimensions(contract, direct_vm, {"ANNOTATION": "UNCLEAR"})
     assert contract.get_state()["phase"] == "REVISION_REQUIRED"
 
     direct_vm.clear_mocks()
     direct_vm.sender = direct_bob
     contract.submit_delivery(MANIFEST, EVIDENCE, PROVENANCE, DIGEST, 1200)
-    mock_packet(direct_vm, assessment())
-    contract.assess_submission()
+    assess_dimensions(contract, direct_vm)
     state = contract.get_state()
     assert state["phase"] == "REVIEW_WINDOW"
     assert state["revision_used"] is True
@@ -120,11 +120,7 @@ def test_partial_accept_uses_deterministic_sixty_forty_split(
 ):
     contract = deploy(direct_vm, direct_deploy, direct_alice, direct_bob, direct_charlie)
     fund_accept_submit(contract, direct_vm, direct_alice, direct_bob)
-    mock_packet(
-        direct_vm,
-        assessment(completeness="FAIL", consistency="FAIL", summary="Three dimensions pass; two non-hard dimensions fail."),
-    )
-    contract.assess_submission()
+    assess_dimensions(contract, direct_vm, {"COMPLETENESS": "FAIL", "CONSISTENCY": "FAIL"})
     assert contract.get_state()["current_overall"] == "PARTIAL_ACCEPT"
     contract.action_deadline_unix = 0
     contract.close_expired()
@@ -152,8 +148,7 @@ def test_schema_failure_is_hard_reject_and_malformed_llm_fails_closed(
 ):
     contract = deploy(direct_vm, direct_deploy, direct_alice, direct_bob, direct_charlie)
     fund_accept_submit(contract, direct_vm, direct_alice, direct_bob)
-    mock_packet(direct_vm, assessment(schema="FAIL", summary="Required schema fields are absent."))
-    contract.assess_submission()
+    assess_dimensions(contract, direct_vm, {"SCHEMA": "FAIL"})
     assert contract.get_state()["current_overall"] == "REJECT"
 
 
@@ -162,7 +157,7 @@ def test_malformed_llm_response_fails_closed(
 ):
     contract = deploy(direct_vm, direct_deploy, direct_alice, direct_bob, direct_charlie)
     fund_accept_submit(contract, direct_vm, direct_alice, direct_bob)
-    mock_packet(direct_vm, {"schema": "PASS"})
+    mock_packet(direct_vm, {"label": "PASS"})
     with direct_vm.expect_revert("invalid_response_shape"):
         contract.assess_submission()
 

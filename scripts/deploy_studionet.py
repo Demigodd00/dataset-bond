@@ -64,7 +64,7 @@ def preflight() -> None:
     )
 
 
-def wait(client, transaction) -> dict:
+def wait(client, transaction, *, allow_consensus_disagreement: bool = False) -> dict:
     receipt = client.wait_for_transaction_receipt(
         transaction_hash=tx_hex(transaction),
         status=TransactionStatus.FINALIZED,
@@ -81,6 +81,11 @@ def wait(client, transaction) -> dict:
         return receipt
     if not tx_execution_succeeded(receipt):
         raise RuntimeError(json.dumps(receipt, default=str, indent=2))
+    result_name = receipt.get("result_name") or receipt.get("resultName")
+    if result_name not in (None, "AGREE", "MAJORITY_AGREE"):
+        if allow_consensus_disagreement:
+            return receipt
+        raise RuntimeError("contract transaction did not reach consensus: " + json.dumps(receipt, default=str))
     return receipt
 
 
@@ -122,6 +127,49 @@ def write(client, address: str, method: str, args: list, value: int = 0) -> tupl
     transaction_hash = tx_hex(transaction)
     print(json.dumps({"step": method, "transaction": transaction_hash}), flush=True)
     return transaction_hash, wait(client, transaction)
+
+
+def write_with_consensus_retry(
+    client, address: str, method: str, args: list, attempts: int = 3
+) -> tuple[str, dict, list[str]]:
+    transaction_hashes: list[str] = []
+    for attempt in range(1, attempts + 1):
+        transaction = client.write_contract(
+            address=address,
+            function_name=method,
+            args=args,
+        )
+        transaction_hash = tx_hex(transaction)
+        transaction_hashes.append(transaction_hash)
+        print(
+            json.dumps(
+                {
+                    "step": method,
+                    "attempt": attempt,
+                    "transaction": transaction_hash,
+                }
+            ),
+            flush=True,
+        )
+        receipt = wait(client, transaction, allow_consensus_disagreement=True)
+        result_name = receipt.get("result_name") or receipt.get("resultName")
+        if result_name in (None, "AGREE", "MAJORITY_AGREE"):
+            return transaction_hash, receipt, transaction_hashes
+        print(
+            json.dumps(
+                {
+                    "step": method,
+                    "attempt": attempt,
+                    "consensus": result_name,
+                    "action": "retry",
+                }
+            ),
+            flush=True,
+        )
+    raise RuntimeError(
+        f"{method} did not reach consensus after {attempts} independent transactions: "
+        + json.dumps(transaction_hashes)
+    )
 
 
 def wait_for_phase(client, address: str, expected: tuple[str, ...]) -> dict:
@@ -195,15 +243,22 @@ def main() -> None:
     ).hexdigest()
     submit_args = [MANIFEST_URL, EVIDENCE_URL, PROVENANCE_URL, manifest_digest, 1200]
     submit_tx, _ = write(provider_client, job_address, "submit_delivery", submit_args)
-    assess_tx, _ = write(provider_client, job_address, "assess_submission", [])
+    assessment_transactions = []
+    for _ in range(5):
+        _, _, assess_attempts = write_with_consensus_retry(
+            provider_client, job_address, "assess_submission", []
+        )
+        assessment_transactions.extend(assess_attempts)
     state = wait_for_phase(owner_client, job_address, ("REVISION_REQUIRED", "REVIEW_WINDOW"))
-    assessment_transactions = [assess_tx]
     submission_transactions = [submit_tx]
     if isinstance(state, dict) and state.get("phase") == "REVISION_REQUIRED":
         revision_tx, _ = write(provider_client, job_address, "submit_delivery", submit_args)
-        reassess_tx, _ = write(provider_client, job_address, "assess_submission", [])
         submission_transactions.append(revision_tx)
-        assessment_transactions.append(reassess_tx)
+        for _ in range(5):
+            _, _, reassess_attempts = write_with_consensus_retry(
+                provider_client, job_address, "assess_submission", []
+            )
+            assessment_transactions.extend(reassess_attempts)
         state = wait_for_phase(owner_client, job_address, ("REVIEW_WINDOW",))
 
     settlement_tx, settlement_receipt = write(owner_client, job_address, "buyer_accept", [])

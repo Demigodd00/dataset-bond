@@ -7,14 +7,14 @@
       "genvm_lint": "passed"
     },
     "contracts/DatasetBondJob.py": {
-      "sha256": "acebaef61696551373732d45eb6815244657bb4ada33a89f60713f66d4b4d77e",
+      "sha256": "5f18c26a8418d901d6a670db1538106a4bd5b6fc35372a02f0d5f180dcf6c889",
       "genvm_lint": "passed"
     }
   },
   "tests": {
     "direct": "9 passed",
     "glsim_linked_contracts": "1 passed",
-    "independent_validator_replays_for_assessment": 5
+    "independently_bound_assessment_dimensions": 5
   },
   "demo_manifest_sha256": "a9065c4f9a89dd367a789711a2d5f0800e003193f0f4a9f6e51c713f7e2f7a42"
 }

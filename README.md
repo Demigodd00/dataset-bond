@@ -9,7 +9,7 @@ It is built as two linked Intelligent Contracts:
 
 ## Why this is an Intelligent Contract
 
-DatasetBond does not store one free-form LLM label. Validators independently refetch three bounded evidence documents and bind five intermediate judgments: schema, completeness, annotation quality, consistency, and provenance. Payment is then derived by explicit contract rules. The assessment feeds a reusable lifecycle with revision, challenge, settlement, withdrawal, timeout recovery, and role-specific reputation.
+DatasetBond does not store one free-form LLM label. Five separate intelligent transactions independently refetch the bounded evidence packet and bind one focused judgment each: schema, completeness, annotation quality, consistency, and provenance. Payment is then derived by explicit contract rules. The assessment feeds a reusable lifecycle with revision, challenge, settlement, withdrawal, timeout recovery, and role-specific reputation.
 
 ## Decision policy
 
