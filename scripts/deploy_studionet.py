@@ -72,6 +72,13 @@ def wait(client, transaction) -> dict:
         retries=120,
         full_transaction=True,
     )
+    status = receipt.get("status_name") or receipt.get("statusName")
+    if status != TransactionStatus.FINALIZED.value:
+        raise RuntimeError(json.dumps(receipt, default=str, indent=2))
+    # Faucet and value-transfer system transactions finalize outside contract
+    # consensus and therefore legitimately have no consensus_data payload.
+    if receipt.get("consensus_data") is None:
+        return receipt
     if not tx_execution_succeeded(receipt):
         raise RuntimeError(json.dumps(receipt, default=str, indent=2))
     return receipt
@@ -252,4 +259,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
