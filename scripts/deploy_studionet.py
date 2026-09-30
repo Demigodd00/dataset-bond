@@ -119,7 +119,21 @@ def write(client, address: str, method: str, args: list, value: int = 0) -> tupl
         args=args,
         value=value,
     )
-    return tx_hex(transaction), wait(client, transaction)
+    transaction_hash = tx_hex(transaction)
+    print(json.dumps({"step": method, "transaction": transaction_hash}), flush=True)
+    return transaction_hash, wait(client, transaction)
+
+
+def wait_for_phase(client, address: str, expected: tuple[str, ...]) -> dict:
+    state: dict | str = ""
+    for _ in range(30):
+        state = read(client, address, "get_state", [])
+        if isinstance(state, dict) and state.get("phase") in expected:
+            return state
+        time.sleep(3)
+    raise RuntimeError(
+        "finalized state did not reach " + ",".join(expected) + ": " + json.dumps(state, default=str)
+    )
 
 
 def main() -> None:
@@ -132,8 +146,10 @@ def main() -> None:
     job_source = JOB_SOURCE.read_text(encoding="utf-8")
 
     registry_deploy = owner_client.deploy_contract(code=registry_source, account=owner, args=[])
+    print(json.dumps({"step": "deploy_registry", "transaction": tx_hex(registry_deploy)}), flush=True)
     registry_deploy_receipt = wait(owner_client, registry_deploy)
     registry_address = extract_address(registry_deploy_receipt)
+    print(json.dumps({"step": "registry_finalized", "address": registry_address}), flush=True)
 
     job_args = [
         registry_address,
@@ -154,8 +170,10 @@ def main() -> None:
         3600,
     ]
     job_deploy = owner_client.deploy_contract(code=job_source, account=owner, args=job_args)
+    print(json.dumps({"step": "deploy_job", "transaction": tx_hex(job_deploy)}), flush=True)
     job_deploy_receipt = wait(owner_client, job_deploy)
     job_address = extract_address(job_deploy_receipt)
+    print(json.dumps({"step": "job_finalized", "address": job_address}), flush=True)
 
     registration_tx, _ = write(
         owner_client,
@@ -168,6 +186,7 @@ def main() -> None:
         raise RuntimeError("registry did not authenticate the deployed job")
 
     faucet_transaction = owner_client.fund_account(owner.address, ESCROW_ATTO * 10)
+    print(json.dumps({"step": "faucet", "transaction": tx_hex(faucet_transaction)}), flush=True)
     wait(owner_client, faucet_transaction)
     fund_tx, _ = write(owner_client, job_address, "fund", [], value=ESCROW_ATTO)
     accept_tx, _ = write(provider_client, job_address, "accept_job", [])
@@ -177,7 +196,7 @@ def main() -> None:
     submit_args = [MANIFEST_URL, EVIDENCE_URL, PROVENANCE_URL, manifest_digest, 1200]
     submit_tx, _ = write(provider_client, job_address, "submit_delivery", submit_args)
     assess_tx, _ = write(provider_client, job_address, "assess_submission", [])
-    state = read(owner_client, job_address, "get_state", [])
+    state = wait_for_phase(owner_client, job_address, ("REVISION_REQUIRED", "REVIEW_WINDOW"))
     assessment_transactions = [assess_tx]
     submission_transactions = [submit_tx]
     if isinstance(state, dict) and state.get("phase") == "REVISION_REQUIRED":
@@ -185,9 +204,7 @@ def main() -> None:
         reassess_tx, _ = write(provider_client, job_address, "assess_submission", [])
         submission_transactions.append(revision_tx)
         assessment_transactions.append(reassess_tx)
-        state = read(owner_client, job_address, "get_state", [])
-    if not isinstance(state, dict) or state.get("phase") != "REVIEW_WINDOW":
-        raise RuntimeError("intelligent assessment did not reach the bounded review window")
+        state = wait_for_phase(owner_client, job_address, ("REVIEW_WINDOW",))
 
     settlement_tx, settlement_receipt = write(owner_client, job_address, "buyer_accept", [])
     triggered = settlement_receipt.get("triggered_transactions", [])
