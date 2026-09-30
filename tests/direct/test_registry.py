@@ -2,6 +2,7 @@ from pathlib import Path
 
 
 CONTRACT = Path(__file__).resolve().parents[2] / "contracts" / "DatasetBondRegistry.py"
+SDK = "v0.2.16"
 
 
 def address(account) -> str:
@@ -10,7 +11,7 @@ def address(account) -> str:
 
 def deploy(vm, direct_deploy, owner):
     vm.sender = owner
-    return direct_deploy(str(CONTRACT))
+    return direct_deploy(str(CONTRACT), sdk_version=SDK)
 
 
 def test_owner_authenticates_job_and_reputation_is_idempotent(
@@ -55,4 +56,3 @@ def test_registration_and_reporting_reject_spoofers(
         )
     with direct_vm.expect_revert("unauthenticated job contract"):
         registry.record_outcome("ACCEPT", 10000, 0)
-

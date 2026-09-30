@@ -4,6 +4,7 @@ import json
 
 
 CONTRACT = Path(__file__).resolve().parents[2] / "contracts" / "DatasetBondJob.py"
+SDK = "v0.2.16"
 ESCROW = 10**18
 MANIFEST = "https://evidence.example.org/manifest.json"
 EVIDENCE = "https://evidence.example.org/validation.json"
@@ -37,6 +38,7 @@ def deploy(vm, direct_deploy, buyer, provider, registry):
         3600,
         3600,
         3600,
+        sdk_version=SDK,
     )
 
 
